@@ -1,11 +1,15 @@
 package me.taein.springbootdeveloper.controller;
 
 import lombok.RequiredArgsConstructor;
+import me.taein.springbootdeveloper.domain.Article;
 import me.taein.springbootdeveloper.dto.ArticleListViewResponse;
+import me.taein.springbootdeveloper.dto.ArticleViewResponse;
 import me.taein.springbootdeveloper.service.BlogService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -14,7 +18,7 @@ import java.util.List;
 public class BlogViewController {
     private final BlogService blogService;
 
-    @GetMapping
+    @GetMapping("/articles")
     public String getArticles(Model model) {
         List<ArticleListViewResponse> articles = blogService.findAll()
                 .stream().map(ArticleListViewResponse::new)
@@ -22,6 +26,25 @@ public class BlogViewController {
         model.addAttribute("articles", articles);
 
         return "articleList";
+    }
+
+    @GetMapping("/articles/{id}")
+    public String getArticle(@PathVariable Long id,  Model model) {
+        Article article = blogService.findById(id);
+        model.addAttribute("article", new ArticleViewResponse(article));
+
+        return "article";
+    }
+
+    @GetMapping("/new-article")
+    public String newArticle(@RequestParam(required = false) Long id, Model model) {
+        if (id == null) {
+            model.addAttribute("article", new ArticleViewResponse());
+        } else {
+            Article article = blogService.findById(id);
+            model.addAttribute("article", new ArticleViewResponse(article));
+        }
+        return "newArticle";
     }
 
 }
